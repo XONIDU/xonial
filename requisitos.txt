@@ -1,0 +1,31 @@
+#Somos XONINDU
+#Creador Darian Alberto Camacho Salas
+#Herramienta XONIAL - Sistema de Monitoreo de Servicio Social
+
+# IMPORTANTE:
+# Este sistema utiliza archivos CSV para almacenamiento local
+# No requiere API keys ni servicios externos
+# Las credenciales por defecto están en credenciales.txt
+
+# Arch Linux
+sudo pacman -S python-pip
+pip install flask --break-system-packages
+
+# Ubuntu y derivados
+sudo apt update
+sudo apt install python3 python3-pip -y
+pip3 install flask
+
+# Windows
+pip install flask
+
+# Estructura de carpetas necesaria:
+mkdir templates
+mkdir data
+
+# Ejecución:
+python start.py
+
+# Credenciales por defecto:
+# Usuario: xonial
+# Contraseña: xonial123
