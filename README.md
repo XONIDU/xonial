@@ -7,10 +7,7 @@
 ![Flask](https://img.shields.io/badge/Flask-2.0+-00ff9d?style=for-the-badge&logo=flask&logoColor=00ff9d&labelColor=black)
 ![License](https://img.shields.io/badge/License-Educational-00ff9d?style=for-the-badge&labelColor=black)
 
-**Sistema de control y monitoreo de servicio social con estilo hacker**
-
-<img src="https://i.imgur.com/8pBQ9jD.png" alt="XONIAL Dashboard" width="800"/>
-
+**Sistema de control y monitoreo de servicio social**
 </div>
 
 ---
