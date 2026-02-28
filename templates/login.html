@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XONIAL - Acceso al Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Efecto de matriz */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            animation: matrix 20s linear infinite;
+        }
+        
+        @keyframes matrix {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(30px); }
+        }
+        
+        .container {
+            max-width: 450px;
+            width: 90%;
+            background: #0a0a0a;
+            border: 2px solid #00ff9d;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.3),
+                        inset 0 0 20px rgba(0, 255, 157, 0.1);
+            padding: 40px;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #00ff9d;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #00ff9d;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ff9d;
+            font-weight: normal;
+        }
+        
+        .header p {
+            color: #00cc7a;
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+        
+        .header .version {
+            color: #008f4c;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ff9d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: #000000;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 15px #00ff9d;
+            background: #001a0f;
+        }
+        
+        input::placeholder {
+            color: #004d2e;
+            font-style: italic;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid #00ff9d;
+            color: #00ff9d;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background: #00ff9d;
+            color: #000000;
+            box-shadow: 0 0 30px #00ff9d;
+        }
+        
+        button::before {
+            content: ">";
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.3s;
+        }
+        
+        button:hover::before {
+            left: 10px;
+            color: #000000;
+        }
+        
+        .flash-messages {
+            margin: 20px 0;
+        }
+        
+        .flash {
+            padding: 12px;
+            background: #001a0f;
+            border: 1px solid #ff3333;
+            color: #ff3333;
+            text-align: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .credentials-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #000000;
+            border: 1px dashed #00ff9d;
+        }
+        
+        .credentials-info p {
+            color: #00cc7a;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .credentials-info .title {
+            color: #00ff9d;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .credentials-info .code {
+            background: #001a0f;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #00ff9d;
+        }
+        
+        .credentials-info .code span {
+            color: #00ff9d;
+            display: block;
+        }
+        
+        .terminal-line {
+            color: #00cc7a;
+            font-size: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .terminal-line::before {
+            content: "$ ";
+            color: #00ff9d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>XONIAL</h1>
+            <p>MONITOREO DE SERVICIO SOCIAL</p>
+            <div class="version">v1.0 - SECURE TERMINAL</div>
+        </div>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash">[!] {{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label>> USUARIO</label>
+                <input type="text" name="username" required placeholder="Ingrese usuario..." autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label>> CONTRASEÑA</label>
+                <input type="password" name="password" required placeholder="Ingrese contraseña...">
+            </div>
+            
+            <button type="submit">ACCEDER</button>
+        </form>
+        
+        <div class="credentials-info">
+            <div class="title">>> CREDENCIALES POR DEFECTO <<</div>
+            <div class="code">
+                <span>usuario: xonial</span>
+                <span>contraseña: xonial123</span>
+            </div>
+            <p>[+] Archivo: credenciales.txt</p>
+            <p>[+] Puedes cambiar las credenciales editando data/usuarios.csv</p>
+        </div>
+        
+        <div class="terminal-line">./xonial --iniciar-sesion</div>
+    </div>
+</body>
+</html>

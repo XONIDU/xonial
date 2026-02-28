@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XONIAL - Gestión Alumnos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #000000;
+            color: #00ff9d;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            animation: scan 10s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: #0a0a0a;
+            border: 1px solid #00ff9d;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+        
+        .header h1 {
+            color: #00ff9d;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header h1::before {
+            content: ">_ ";
+            color: #00cc7a;
+        }
+        
+        .header a {
+            color: #00ff9d;
+            text-decoration: none;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .header a:hover {
+            text-decoration: underline;
+        }
+        
+        .header .terminal-line {
+            color: #00cc7a;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .header .terminal-line::before {
+            content: "$ ";
+            color: #00ff9d;
+        }
+        
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: transparent;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 12px 24px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn:hover {
+            background: #00ff9d;
+            color: #000000;
+            box-shadow: 0 0 20px #00ff9d;
+        }
+        
+        .btn-success { border-color: #00ff9d; }
+        
+        .section {
+            background: #0a0a0a;
+            border: 1px solid #00ff9d;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: #00cc7a;
+            border-bottom: 1px solid #00ff9d;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #003d24;
+            color: #00ff9d;
+        }
+        
+        tr:hover td {
+            background: #001a0f;
+        }
+        
+        .activo {
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        
+        .inactivo {
+            border: 1px solid #ff3333;
+            color: #ff3333;
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        
+        td a {
+            color: #00ff9d;
+            text-decoration: none;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+        
+        td a:hover {
+            text-decoration: underline;
+            color: #00cc7a;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .modal-content {
+            background: #0a0a0a;
+            margin: 5% auto;
+            padding: 30px;
+            border: 2px solid #00ff9d;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(0, 255, 157, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ff9d;
+            padding-bottom: 10px;
+        }
+        
+        .modal-header h2 {
+            color: #00ff9d;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+        
+        .close {
+            color: #ff3333;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #ff6666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00cc7a;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background: #000000;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash {
+            padding: 12px;
+            background: #001a0f;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            text-align: center;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('dashboard') }}">[← VOLVER AL DASHBOARD]</a>
+            <h1>GESTIÓN DE ALUMNOS</h1>
+            <div class="terminal-line">./xonial --gestion-alumnos</div>
+        </div>
+        
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash">[!] {{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Actions -->
+        <div class="actions-bar">
+            <h2 style="color: #00cc7a;">>> LISTA DE ALUMNOS</h2>
+            <button class="btn btn-success" onclick="mostrarModal('modalNuevoAlumno')">[+ NUEVO ALUMNO]</button>
+        </div>
+        
+        <!-- Tabla de alumnos -->
+        <div class="section">
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>NOMBRE</th>
+                            <th>CARRERA</th>
+                            <th>SEM</th>
+                            <th>CUENTA</th>
+                            <th>OCUPACIÓN</th>
+                            <th>CONTACTO</th>
+                            <th>ESTADO</th>
+                            <th>HORAS</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alumno in alumnos %}
+                        {% set total_horas = obtener_total_horas_alumno(alumno.get('id_alumno', '')) %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><strong>{{ alumno.get('nombre', '') }}</strong></td>
+                            <td>{{ alumno.get('carrera', '') }}</td>
+                            <td>{{ alumno.get('semestre', '') }}</td>
+                            <td>{{ alumno.get('num_cuenta', '') }}</td>
+                            <td>{{ alumno.get('ocupacion', '') }}</td>
+                            <td>{{ alumno.get('contacto', '') }}</td>
+                            <td>
+                                {% if alumno.get('activo') == '1' %}
+                                    <span class="activo">[ACTIVO]</span>
+                                {% else %}
+                                    <span class="inactivo">[INACTIVO]</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ "%.1f"|format(total_horas) }}h</strong></td>
+                            <td>
+                                <a href="{{ url_for('editar_alumno', id_alumno=alumno.get('id_alumno', '')) }}">[EDITAR]</a>
+                                <a href="{{ url_for('historial_alumno', id_alumno=alumno.get('id_alumno', '')) }}">[HIST]</a>
+                                {% if alumno.get('activo') == '1' %}
+                                    <a href="{{ url_for('desactivar_alumno', id_alumno=alumno.get('id_alumno', '')) }}" style="color: #ff3333;">[DESACT]</a>
+                                {% else %}
+                                    <a href="{{ url_for('activar_alumno', id_alumno=alumno.get('id_alumno', '')) }}" style="color: #00ff9d;">[ACTIVAR]</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if alumnos|length == 0 %}
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 40px; color: #008f4c;">
+                                [NO HAY ALUMNOS REGISTRADOS]
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal nuevo alumno -->
+    <div id="modalNuevoAlumno" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>> NUEVO ALUMNO</h2>
+                <span class="close" onclick="cerrarModal('modalNuevoAlumno')">&times;</span>
+            </div>
+            <form method="POST" action="{{ url_for('agregar_alumno') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>NOMBRE COMPLETO *</label>
+                        <input type="text" name="nombre" required placeholder="Ej: JUAN PÉREZ">
+                    </div>
+                    <div class="form-group">
+                        <label>CARRERA *</label>
+                        <input type="text" name="carrera" required placeholder="Ej: INFORMÁTICA">
+                    </div>
+                    <div class="form-group">
+                        <label>SEMESTRE *</label>
+                        <input type="number" name="semestre" min="1" max="12" required placeholder="Ej: 6">
+                    </div>
+                    <div class="form-group">
+                        <label>NÚMERO DE CUENTA *</label>
+                        <input type="text" name="num_cuenta" required placeholder="Ej: 202300123">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>OCUPACIÓN *</label>
+                    <input type="text" name="ocupacion" required placeholder="Ej: APOYO EN LABORATORIO">
+                </div>
+                <div class="form-group">
+                    <label>CONTACTO *</label>
+                    <input type="tel" name="contacto" required placeholder="Ej: 5512345678">
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">[REGISTRAR ALUMNO]</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function mostrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

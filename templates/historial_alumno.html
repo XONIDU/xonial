@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XONIAL - Historial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #000000;
+            color: #00ff9d;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            animation: scan 10s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: #0a0a0a;
+            border: 1px solid #00ff9d;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+        
+        .header a {
+            color: #00ff9d;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .header a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            color: #00ff9d;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header h1::before {
+            content: ">_ ";
+            color: #00cc7a;
+        }
+        
+        .alumno-info {
+            margin: 20px 0;
+            padding: 20px;
+            background: #001a0f;
+            border: 1px solid #00ff9d;
+        }
+        
+        .alumno-info p {
+            margin: 8px 0;
+            color: #00cc7a;
+        }
+        
+        .alumno-info strong {
+            color: #00ff9d;
+        }
+        
+        .total-horas {
+            font-size: 32px;
+            color: #00ff9d;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #00ff9d;
+        }
+        
+        .card {
+            background: #0a0a0a;
+            border: 1px solid #00ff9d;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            color: #00ff9d;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ff9d;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #00cc7a;
+            border-bottom: 1px solid #00ff9d;
+            font-weight: normal;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #003d24;
+            color: #00ff9d;
+        }
+        
+        tr:hover td {
+            background: #001a0f;
+        }
+        
+        .btn {
+            background: transparent;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            padding: 12px 24px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn:hover {
+            background: #00ff9d;
+            color: #000000;
+            box-shadow: 0 0 20px #00ff9d;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #000000;
+            border: 1px solid #00ff9d;
+            color: #00ff9d;
+            font-family: 'Courier New', monospace;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00cc7a;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .terminal-line {
+            color: #00cc7a;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .terminal-line::before {
+            content: "$ ";
+            color: #00ff9d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('gestion_alumnos') }}">[← VOLVER A GESTIÓN]</a>
+            <h1>HISTORIAL DEL ALUMNO</h1>
+            <div class="terminal-line">./xonial --historial {{ alumno.get('id_alumno', '') }}</div>
+        </div>
+        
+        <!-- Info del alumno -->
+        <div class="alumno-info">
+            <p><strong>NOMBRE:</strong> {{ alumno.get('nombre', '') }}</p>
+            <p><strong>CARRERA:</strong> {{ alumno.get('carrera', '') }} | <strong>SEMESTRE:</strong> {{ alumno.get('semestre', '') }}</p>
+            <p><strong>CUENTA:</strong> {{ alumno.get('num_cuenta', '') }}</p>
+            <p><strong>OCUPACIÓN:</strong> {{ alumno.get('ocupacion', '') }}</p>
+            <p><strong>CONTACTO:</strong> {{ alumno.get('contacto', '') }}</p>
+            <div class="total-horas">>> TOTAL: {{ "%.1f"|format(total_horas) }} HORAS <<</div>
+        </div>
+        
+        <!-- Tabla de registros -->
+        <div class="card">
+            <h2>> REGISTROS DE HORAS</h2>
+            {% if registros_alumno %}
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>FECHA</th>
+                            <th>ENTRADA</th>
+                            <th>SALIDA</th>
+                            <th>HORAS</th>
+                            <th>OBSERVACIONES</th>
+                            <th>TIPO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in registros_alumno|sort(attribute='fecha', reverse=True) %}
+                        <tr>
+                            <td>{{ registro.get('fecha', '') }}</td>
+                            <td>{{ registro.get('hora_entrada', '') }}</td>
+                            <td>{{ registro.get('hora_salida', '') if registro.get('hora_salida') else '--' }}</td>
+                            <td><strong>{{ registro.get('horas_totales', '0') }}h</strong></td>
+                            <td>{{ registro.get('observaciones', '') }}</td>
+                            <td>
+                                {% if registro.get('tipo_registro') == 'manual' %}
+                                    <span style="color: #ffaa00;">[MANUAL]</span>
+                                {% else %}
+                                    <span style="color: #00ff9d;">[AUTOMÁTICO]</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; padding: 40px; color: #008f4c;">[NO HAY REGISTROS PARA ESTE ALUMNO]</p>
+            {% endif %}
+        </div>
+        
+        <!-- Formulario para agregar registro manual -->
+        <div class="card">
+            <h2>> AGREGAR REGISTRO MANUAL</h2>
+            <form method="POST" action="{{ url_for('agregar_registro_manual') }}">
+                <input type="hidden" name="id_alumno" value="{{ alumno.get('id_alumno', '') }}">
+                
+                <div class="form-grid">
+                    <div>
+                        <label>FECHA *</label>
+                        <input type="date" name="fecha" required>
+                    </div>
+                    <div>
+                        <label>HORA ENTRADA *</label>
+                        <input type="time" name="hora_entrada" required>
+                    </div>
+                    <div>
+                        <label>HORA SALIDA *</label>
+                        <input type="time" name="hora_salida" required>
+                    </div>
+                    <div>
+                        <label>HORAS (OPCIONAL)</label>
+                        <input type="number" name="horas_totales" step="0.5" placeholder="Auto">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label>OBSERVACIONES</label>
+                    <textarea name="observaciones" rows="2" placeholder="Ej: Horas extras, justificante..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%;">[AGREGAR REGISTRO]</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
