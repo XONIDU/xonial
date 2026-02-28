@@ -2,11 +2,6 @@
 # Creador: XONIDU
 <div align="center">
 
-![XONIAL](https://img.shields.io/badge/XONIAL-v1.0-00ff9d?style=for-the-badge&labelColor=black&color=00ff9d)
-![Python](https://img.shields.io/badge/Python-3.8+-00ff9d?style=for-the-badge&logo=python&logoColor=00ff9d&labelColor=black)
-![Flask](https://img.shields.io/badge/Flask-2.0+-00ff9d?style=for-the-badge&logo=flask&logoColor=00ff9d&labelColor=black)
-![License](https://img.shields.io/badge/License-Educational-00ff9d?style=for-the-badge&labelColor=black)
-
 **Sistema de control y monitoreo de servicio social**
 </div>
 
