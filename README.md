@@ -1,11 +1,8 @@
 # 🌐 XONIAL - Monitoreo de Servicio Social
-# Creador: XONIDU
-<div align="center">
+# Creador: Darian Alberto Camacho Salas
+# Equipo: XONIDU
 
 **Sistema de control y monitoreo de servicio social**
-</div>
-
----
 
 ---
 
@@ -24,33 +21,36 @@ XONIAL es un sistema de gestión de servicio social diseñado para instituciones
 
 ## ⚙️ ¿Qué hace?
 
-| Módulo | Función |
-|--------|---------|
-| **Dashboard** | Vista general con estadísticas en tiempo real |
-| **Registro Rápido** | Registro de entradas y salidas con un clic |
-| **Gestión de Alumnos** | CRUD completo de alumnos |
-| **Registro Manual** | Agregar horas históricas o corregir registros |
-| **Historial** | Visualización detallada por alumno |
-| **Reportes** | Estadísticas y ranking de horas |
-| **Exportación** | Descarga de datos en formato CSV |
+**Dashboard:** Vista general con estadísticas en tiempo real
+
+**Registro Rápido:** Registro de entradas y salidas con un clic
+
+**Gestión de Alumnos:** CRUD completo de alumnos
+
+**Registro Manual:** Agregar horas históricas o corregir registros
+
+**Historial:** Visualización detallada por alumno
+
+**Reportes:** Estadísticas y ranking de horas
+
+**Exportación:** Descarga de datos en formato CSV
 
 ### Características principales:
 
-- ✅ **Interfaz estilo terminal** con tema negro y verde neón
-- ✅ **Cálculo automático** de horas entre entrada y salida
-- ✅ **Sistema de login** con credenciales configurables
-- ✅ **Persistencia de datos** en archivos CSV
-- ✅ **Registros manuales** para correcciones históricas
-- ✅ **Ranking de alumnos** por horas acumuladas
-- ✅ **Exportación de reportes** para Excel/ análisis
-- ✅ **Diseño responsive** para móviles y tablets
+- ✅ Interfaz estilo terminal con tema negro y verde neón
+- ✅ Cálculo automático de horas entre entrada y salida
+- ✅ Sistema de login con credenciales configurables
+- ✅ Persistencia de datos en archivos CSV
+- ✅ Registros manuales para correcciones históricas
+- ✅ Ranking de alumnos por horas acumuladas
+- ✅ Exportación de reportes para Excel y análisis
+- ✅ Diseño responsive para móviles y tablets
 
 ---
 
 ## 📥 Instalación
 
 ### Requisitos previos
-
 - Python 3.8 o superior
 - pip (gestor de paquetes de Python)
 
@@ -120,57 +120,48 @@ xonial/
 
 El sistema cuenta con una interfaz de estilo **hacker/terminal** con:
 
-- 🖤 **Fondo negro mate** (#000000)
-- 💚 **Texto verde neón** (#00ff9d)
-- 🔲 **Bordes con efecto matrix**
-- ⌨️ **Tipografía monospace** (Courier New)
-- ⚡ **Efectos de resplandor** y animaciones
-- 📊 **Tablas estilo terminal** con hover effects
-- 🎯 **Indicadores visuales** para estados
+- 🖤 Fondo negro mate (#000000)
+- 💚 Texto verde neón (#00ff9d)
+- 🔲 Bordes con efecto matrix
+- ⌨️ Tipografía monospace (Courier New)
+- ⚡ Efectos de resplandor y animaciones
+- 📊 Tablas estilo terminal con hover effects
+- 🎯 Indicadores visuales para estados
 
 ---
 
 ## 🚀 Uso del sistema
 
-### 1. **Acceso al sistema**
-   - Ingresa con las credenciales por defecto
-   - Visualiza el dashboard con estadísticas generales
+### 1. Acceso al sistema
+   Ingresa con las credenciales por defecto y visualiza el dashboard con estadísticas generales
 
-### 2. **Registro de entrada/salida**
-   - Usa el botón "Registro Rápido"
-   - Selecciona alumno y tipo de registro
-   - El sistema calcula horas automáticamente
+### 2. Registro de entrada/salida
+   Usa el botón "Registro Rápido", selecciona alumno y tipo de registro; el sistema calcula horas automáticamente
 
-### 3. **Gestión de alumnos**
-   - Agrega nuevos alumnos con todos sus datos
-   - Edita información existente
-   - Activa/desactiva alumnos
-   - Visualiza historial individual
+### 3. Gestión de alumnos
+   Agrega nuevos alumnos con todos sus datos, edita información existente, activa o desactiva alumnos y visualiza historial individual
 
-### 4. **Reportes**
-   - Ranking de horas por alumno
-   - Estadísticas por carrera
-   - Exportación a CSV
-   - Progreso hacia la meta (480 horas)
+### 4. Reportes
+   Consulta ranking de horas por alumno, estadísticas por carrera, exportación a CSV y progreso hacia la meta de 480 horas
 
 ---
 
 ## 📊 Formato de datos
 
 ### alumnos.csv
-```csv
+```
 id_alumno,nombre,carrera,semestre,num_cuenta,ocupacion,contacto,activo
 abc123,Juan Pérez,Informática,6,2023001,Apoyo Lab,5512345678,1
 ```
 
 ### registros.csv
-```csv
+```
 id_registro,id_alumno,fecha,hora_entrada,hora_salida,horas_totales,observaciones,tipo_registro
 def456,abc123,2024-01-15,09:00,14:00,5.0,,automatico
 ```
 
 ### usuarios.csv
-```csv
+```
 username,password,nombre
 xonial,xonial123,Administrador Xonial
 ```
@@ -186,13 +177,9 @@ xonial,xonial123,Administrador Xonial
 
 ---
 
-## 🤝 Equipo de desarrollo
+## 👨‍💻 Desarrollador
 
-| Rol | Nombre |
-|-----|--------|
-| **Backend** | Darian Alberto Camacho Salas |
-| **Frontend** | Oscar Rodolfo Barragan Perez |
-| **Asesor** | Dr. Raul Dali Cruz Morales |
+**Darian Alberto Camacho Salas**
 
 ---
 
@@ -200,23 +187,20 @@ xonial,xonial123,Administrador Xonial
 
 ¿Dudas, sugerencias o reportes de errores?
 
-<div align="center">
+**Instagram:** @xonidu
 
-[![Instagram](https://img.shields.io/badge/Instagram-@xonidu-00ff9d?style=for-the-badge&logo=instagram&logoColor=00ff9d&labelColor=black)](https://instagram.com/xonidu)
-[![Facebook](https://img.shields.io/badge/Facebook-xonidu-00ff9d?style=for-the-badge&logo=facebook&logoColor=00ff9d&labelColor=black)](https://facebook.com/xonidu)
-[![Email](https://img.shields.io/badge/Email-xonidu@gmail.com-00ff9d?style=for-the-badge&logo=gmail&logoColor=00ff9d&labelColor=black)](mailto:xonidu@gmail.com)
+**Facebook:** xonidu
 
-</div>
+**Email:** xonidu@gmail.com
 
 ---
 
 ## 📝 Licencia
 
-Este proyecto está bajo una **licencia educativa**. El código puede ser utilizado con fines de aprendizaje y enseñanza, siempre respetando los derechos de autor y dando crédito al equipo de desarrollo.
+Este proyecto está bajo una **licencia educativa**. El código puede ser utilizado con fines de aprendizaje y enseñanza, siempre respetando los derechos de autor y dando crédito al desarrollador.
 
 **No se permite el uso comercial no autorizado ni la redistribución sin permiso explícito.**
 
 ---
 
 ### ⚡ XONIAL v1.0 - Monitoreo de Servicio Social ⚡
-
