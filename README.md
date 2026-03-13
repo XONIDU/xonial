@@ -1,5 +1,6 @@
 # 🌐 XONIAL - Monitoreo de Servicio Social
 # Creador: Darian Alberto Camacho Salas
+# Colaborador: Oscar Rodolfo Barragan Perez
 # Equipo: XONIDU
 
 **Sistema de control y monitoreo de servicio social**
