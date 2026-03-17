@@ -1,514 +1,446 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+XONIAL 2026 - Lanzador Universal del Sistema de Monitoreo de Servicio Social
+Este script verifica dependencias y ejecuta xonial.py
+Desarrollado por: Darian Alberto Camacho Salas
+#Somos XONINDU
+"""
+
+import subprocess
+import sys
 import os
-import csv
-from datetime import datetime, timedelta
-from functools import wraps
+import platform
+import shutil
+import importlib.util
+import time
 
-app = Flask(__name__)
-app.secret_key = "clave_secreta_servsocial_xonial"
-app.template_folder = 'templates'
-
-# Configuración de carpetas
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_FOLDER = os.path.join(BASE_DIR, 'data')
-os.makedirs(CSV_FOLDER, exist_ok=True)
-
-ALUMNOS_CSV = os.path.join(CSV_FOLDER, 'alumnos.csv')
-REGISTROS_CSV = os.path.join(CSV_FOLDER, 'registros.csv')
-USUARIOS_CSV = os.path.join(CSV_FOLDER, 'usuarios.csv')
-CREDENCIALES_TXT = os.path.join(BASE_DIR, 'credenciales.txt')
-
-# =============================================
-# FUNCIONES AUXILIARES
-# =============================================
-
-def inicializar_csv():
-    """Inicializa los archivos CSV si no existen"""
-    # Usuarios con credenciales por defecto
-    if not os.path.exists(USUARIOS_CSV):
-        with open(USUARIOS_CSV, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['username', 'password', 'nombre'])
-            writer.writerow(['xonial', 'xonial123', 'Administrador Xonial'])
+# Colores para terminal
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    CYAN = '\033[96m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
     
-    # Crear archivo de credenciales.txt
-    if not os.path.exists(CREDENCIALES_TXT):
-        with open(CREDENCIALES_TXT, 'w', encoding='utf-8') as f:
-            f.write("=== CREDENCIALES POR DEFECTO ===\n")
-            f.write("Usuario: xonial\n")
-            f.write("Contraseña: xonial123\n")
-            f.write("\n=== INSTRUCCIONES ===\n")
-            f.write("1. Para cambiar credenciales, edita el archivo data/usuarios.csv\n")
-            f.write("2. Mantén el formato: username,password,nombre\n")
-            f.write("3. Reinicia el sistema después de los cambios\n")
+    @staticmethod
+    def supports_color():
+        """Verifica si la terminal soporta colores"""
+        if platform.system() == 'Windows':
+            try:
+                import ctypes
+                kernel32 = ctypes.windll.kernel32
+                return kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+            except:
+                return False
+        return True
+
+# Desactivar colores si no hay soporte
+if not Colors.supports_color():
+    for attr in dir(Colors):
+        if not attr.startswith('_') and attr != 'supports_color':
+            setattr(Colors, attr, '')
+
+def get_system():
+    """Detecta el sistema operativo"""
+    return platform.system().lower()
+
+def get_linux_distro():
+    """Detecta la distribución de Linux"""
+    if get_system() != 'linux':
+        return None
     
-    # Alumnos
-    if not os.path.exists(ALUMNOS_CSV):
-        with open(ALUMNOS_CSV, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['id_alumno', 'nombre', 'carrera', 'semestre', 'num_cuenta', 'ocupacion', 'contacto', 'activo'])
-    
-    # Registros
-    if not os.path.exists(REGISTROS_CSV):
-        with open(REGISTROS_CSV, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['id_registro', 'id_alumno', 'fecha', 'hora_entrada', 'hora_salida', 'horas_totales', 'observaciones', 'tipo_registro'])
-
-def leer_csv(archivo):
-    """Lee un archivo CSV y retorna lista de diccionarios"""
-    if not os.path.exists(archivo):
-        return []
     try:
-        with open(archivo, 'r', encoding='utf-8') as f:
-            return list(csv.DictReader(f))
-    except Exception as e:
-        print(f"Error leyendo {archivo}: {e}")
-        return []
-
-def escribir_csv(archivo, datos, campos):
-    """Escribe datos en un archivo CSV"""
-    try:
-        with open(archivo, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=campos)
-            writer.writeheader()
-            if datos:
-                writer.writerows(datos)
-    except Exception as e:
-        print(f"Error escribiendo {archivo}: {e}")
-
-def generar_id_unico():
-    """Genera un ID único de 8 caracteres"""
-    import secrets
-    import string
-    return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
-
-def calcular_horas_totales(hora_entrada, hora_salida):
-    """Calcula las horas entre entrada y salida"""
-    try:
-        entrada = datetime.strptime(hora_entrada, '%H:%M')
-        salida = datetime.strptime(hora_salida, '%H:%M')
-        
-        # Si la salida es después de la media noche
-        if salida < entrada:
-            salida = salida + timedelta(days=1)
-        
-        diferencia = salida - entrada
-        horas = diferencia.total_seconds() / 3600
-        return round(horas, 2)
+        if os.path.exists('/etc/os-release'):
+            with open('/etc/os-release', 'r') as f:
+                content = f.read().lower()
+                if 'ubuntu' in content:
+                    return 'ubuntu'
+                elif 'debian' in content:
+                    return 'debian'
+                elif 'fedora' in content:
+                    return 'fedora'
+                elif 'centos' in content:
+                    return 'centos'
+                elif 'arch' in content:
+                    return 'arch'
+                elif 'manjaro' in content:
+                    return 'manjaro'
+                elif 'mint' in content:
+                    return 'mint'
+        return 'linux-generico'
     except:
-        return 0
+        return 'linux-generico'
 
-def obtener_total_horas_alumno(id_alumno):
-    """Calcula el total de horas acumuladas de un alumno"""
-    registros = leer_csv(REGISTROS_CSV)
-    total = 0
-    for registro in registros:
-        if registro['id_alumno'] == id_alumno and registro['horas_totales']:
-            try:
-                total += float(registro['horas_totales'])
-            except:
-                pass
-    return round(total, 2)
-
-def login_required(f):
-    """Decorador para requerir autenticación"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'username' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-# =============================================
-# RUTAS PRINCIPALES
-# =============================================
-
-@app.route('/')
-def index():
-    return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        usuarios = leer_csv(USUARIOS_CSV)
-        usuario = next((u for u in usuarios if u['username'] == username and u['password'] == password), None)
-        
-        if usuario:
-            session['username'] = username
-            session['nombre'] = usuario['nombre']
-            return redirect(url_for('dashboard'))
-        else:
-            flash('ACCESO DENEGADO: Credenciales incorrectas')
-    
-    return render_template('login.html')
-
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    alumnos = leer_csv(ALUMNOS_CSV)
-    registros = leer_csv(REGISTROS_CSV)
-    
-    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-    registros_hoy = [r for r in registros if r['fecha'] == fecha_hoy]
-    
-    alumnos_activos = len([a for a in alumnos if a.get('activo') == '1'])
-    alumnos_presentes = len([r for r in registros_hoy if r.get('hora_salida') == ''])
-    
-    total_hoy = 0
-    for r in registros_hoy:
-        if r.get('hora_salida') and r.get('horas_totales'):
-            try:
-                total_hoy += float(r['horas_totales'])
-            except:
-                continue
-    
-    return render_template('dashboard.html', 
-                         alumnos=alumnos,
-                         registros_hoy=registros_hoy,
-                         alumnos_activos=alumnos_activos,
-                         alumnos_presentes=alumnos_presentes,
-                         total_hoy=total_hoy,
-                         fecha_hoy=fecha_hoy,
-                         obtener_total_horas_alumno=obtener_total_horas_alumno)
-
-@app.route('/registro-rapido', methods=['POST'])
-@login_required
-def registro_rapido():
-    id_alumno = request.form.get('id_alumno', '')
-    tipo = request.form.get('tipo', '')
-    observaciones = request.form.get('observaciones', '')
-    
-    if not id_alumno or not tipo:
-        flash('ERROR: Datos incompletos')
-        return redirect(url_for('dashboard'))
-    
-    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
-    hora_actual = datetime.now().strftime('%H:%M')
-    
-    registros = leer_csv(REGISTROS_CSV)
-    registro_hoy = next((r for r in registros if r.get('id_alumno') == id_alumno and r.get('fecha') == fecha_hoy), None)
-    
-    if tipo == 'entrada':
-        if registro_hoy:
-            flash('ALERTA: Este alumno ya tiene registro de entrada hoy')
-        else:
-            nuevo_registro = {
-                'id_registro': generar_id_unico(),
-                'id_alumno': id_alumno,
-                'fecha': fecha_hoy,
-                'hora_entrada': hora_actual,
-                'hora_salida': '',
-                'horas_totales': '',
-                'observaciones': observaciones,
-                'tipo_registro': 'automatico'
-            }
-            registros.append(nuevo_registro)
-            escribir_csv(REGISTROS_CSV, registros, ['id_registro', 'id_alumno', 'fecha', 'hora_entrada', 'hora_salida', 'horas_totales', 'observaciones', 'tipo_registro'])
-            flash(f'ENTRADA REGISTRADA: {hora_actual} hrs')
-    
-    elif tipo == 'salida':
-        if not registro_hoy:
-            flash('ERROR: No hay registro de entrada para hoy')
-        elif registro_hoy.get('hora_salida'):
-            flash('ALERTA: Ya tiene registro de salida hoy')
-        else:
-            horas_totales = calcular_horas_totales(registro_hoy.get('hora_entrada', ''), hora_actual)
-            registro_hoy['hora_salida'] = hora_actual
-            registro_hoy['horas_totales'] = str(horas_totales)
-            registro_hoy['observaciones'] = observaciones if observaciones else registro_hoy.get('observaciones', '')
-            
-            escribir_csv(REGISTROS_CSV, registros, ['id_registro', 'id_alumno', 'fecha', 'hora_entrada', 'hora_salida', 'horas_totales', 'observaciones', 'tipo_registro'])
-            flash(f'SALIDA REGISTRADA - Horas: {horas_totales:.2f}')
-    
-    return redirect(url_for('dashboard'))
-
-@app.route('/gestion-alumnos')
-@login_required
-def gestion_alumnos():
-    alumnos = leer_csv(ALUMNOS_CSV)
-    return render_template('gestion_alumnos.html', 
-                         alumnos=alumnos,
-                         obtener_total_horas_alumno=obtener_total_horas_alumno)
-
-@app.route('/agregar-alumno', methods=['POST'])
-@login_required
-def agregar_alumno():
-    nombre = request.form.get('nombre', '').strip()
-    carrera = request.form.get('carrera', '').strip()
-    semestre = request.form.get('semestre', '').strip()
-    num_cuenta = request.form.get('num_cuenta', '').strip()
-    ocupacion = request.form.get('ocupacion', '').strip()
-    contacto = request.form.get('contacto', '').strip()
-    
-    if not all([nombre, carrera, semestre, num_cuenta, ocupacion, contacto]):
-        flash('ERROR: Todos los campos son obligatorios')
-        return redirect(url_for('gestion_alumnos'))
-    
-    alumnos = leer_csv(ALUMNOS_CSV)
-    
-    if any(a.get('num_cuenta') == num_cuenta for a in alumnos):
-        flash('ERROR: Número de cuenta ya existe')
-        return redirect(url_for('gestion_alumnos'))
-    
-    nuevo_alumno = {
-        'id_alumno': generar_id_unico(),
-        'nombre': nombre,
-        'carrera': carrera,
-        'semestre': semestre,
-        'num_cuenta': num_cuenta,
-        'ocupacion': ocupacion,
-        'contacto': contacto,
-        'activo': '1'
-    }
-    
-    alumnos.append(nuevo_alumno)
-    escribir_csv(ALUMNOS_CSV, alumnos, ['id_alumno', 'nombre', 'carrera', 'semestre', 'num_cuenta', 'ocupacion', 'contacto', 'activo'])
-    
-    flash(f'ALUMNO AGREGADO: {nombre}')
-    return redirect(url_for('gestion_alumnos'))
-
-@app.route('/editar-alumno/<id_alumno>', methods=['GET', 'POST'])
-@login_required
-def editar_alumno(id_alumno):
-    alumnos = leer_csv(ALUMNOS_CSV)
-    alumno = next((a for a in alumnos if a.get('id_alumno') == id_alumno), None)
-    
-    if not alumno:
-        flash('ERROR: Alumno no encontrado')
-        return redirect(url_for('gestion_alumnos'))
-    
-    if request.method == 'POST':
-        alumno['nombre'] = request.form.get('nombre', '').strip()
-        alumno['carrera'] = request.form.get('carrera', '').strip()
-        alumno['semestre'] = request.form.get('semestre', '').strip()
-        alumno['num_cuenta'] = request.form.get('num_cuenta', '').strip()
-        alumno['ocupacion'] = request.form.get('ocupacion', '').strip()
-        alumno['contacto'] = request.form.get('contacto', '').strip()
-        alumno['activo'] = request.form.get('activo', '1')
-        
-        escribir_csv(ALUMNOS_CSV, alumnos, ['id_alumno', 'nombre', 'carrera', 'semestre', 'num_cuenta', 'ocupacion', 'contacto', 'activo'])
-        flash('DATOS ACTUALIZADOS')
-        return redirect(url_for('gestion_alumnos'))
-    
-    return render_template('editar_alumno.html', alumno=alumno)
-
-@app.route('/activar-alumno/<id_alumno>')
-@login_required
-def activar_alumno(id_alumno):
-    alumnos = leer_csv(ALUMNOS_CSV)
-    for alumno in alumnos:
-        if alumno.get('id_alumno') == id_alumno:
-            alumno['activo'] = '1'
-            break
-    escribir_csv(ALUMNOS_CSV, alumnos, ['id_alumno', 'nombre', 'carrera', 'semestre', 'num_cuenta', 'ocupacion', 'contacto', 'activo'])
-    flash('ALUMNO ACTIVADO')
-    return redirect(url_for('gestion_alumnos'))
-
-@app.route('/desactivar-alumno/<id_alumno>')
-@login_required
-def desactivar_alumno(id_alumno):
-    alumnos = leer_csv(ALUMNOS_CSV)
-    for alumno in alumnos:
-        if alumno.get('id_alumno') == id_alumno:
-            alumno['activo'] = '0'
-            break
-    escribir_csv(ALUMNOS_CSV, alumnos, ['id_alumno', 'nombre', 'carrera', 'semestre', 'num_cuenta', 'ocupacion', 'contacto', 'activo'])
-    flash('ALUMNO DESACTIVADO')
-    return redirect(url_for('gestion_alumnos'))
-
-@app.route('/historial-alumno/<id_alumno>')
-@login_required
-def historial_alumno(id_alumno):
-    alumnos = leer_csv(ALUMNOS_CSV)
-    registros = leer_csv(REGISTROS_CSV)
-    
-    alumno = next((a for a in alumnos if a.get('id_alumno') == id_alumno), None)
-    if not alumno:
-        flash('ERROR: Alumno no encontrado')
-        return redirect(url_for('gestion_alumnos'))
-    
-    registros_alumno = [r for r in registros if r.get('id_alumno') == id_alumno]
-    total_horas = obtener_total_horas_alumno(id_alumno)
-    
-    return render_template('historial_alumno.html', 
-                         alumno=alumno, 
-                         registros_alumno=registros_alumno,
-                         total_horas=total_horas)
-
-@app.route('/registro-manual')
-@login_required
-def registro_manual():
-    alumnos = leer_csv(ALUMNOS_CSV)
-    return render_template('registro_manual.html', alumnos=alumnos)
-
-@app.route('/agregar-registro-manual', methods=['POST'])
-@login_required
-def agregar_registro_manual():
-    id_alumno = request.form.get('id_alumno', '')
-    fecha = request.form.get('fecha', '')
-    hora_entrada = request.form.get('hora_entrada', '')
-    hora_salida = request.form.get('hora_salida', '')
-    horas_totales = request.form.get('horas_totales', '')
-    observaciones = request.form.get('observaciones', '')
-    
-    if not all([id_alumno, fecha, hora_entrada, hora_salida]):
-        flash('ERROR: Fecha y horas son obligatorias')
-        return redirect(url_for('registro_manual'))
-    
-    if not horas_totales:
-        horas_totales = calcular_horas_totales(hora_entrada, hora_salida)
+def get_python_command():
+    """Obtiene el comando Python correcto"""
+    if get_system() == 'windows':
+        return ['python']
     else:
         try:
-            horas_totales = float(horas_totales)
+            subprocess.run(['python3', '--version'], capture_output=True, check=True)
+            return ['python3']
         except:
-            horas_totales = calcular_horas_totales(hora_entrada, hora_salida)
-    
-    registros = leer_csv(REGISTROS_CSV)
-    
-    nuevo_registro = {
-        'id_registro': generar_id_unico(),
-        'id_alumno': id_alumno,
-        'fecha': fecha,
-        'hora_entrada': hora_entrada,
-        'hora_salida': hora_salida,
-        'horas_totales': str(horas_totales),
-        'observaciones': observaciones,
-        'tipo_registro': 'manual'
-    }
-    
-    registros.append(nuevo_registro)
-    escribir_csv(REGISTROS_CSV, registros, ['id_registro', 'id_alumno', 'fecha', 'hora_entrada', 'hora_salida', 'horas_totales', 'observaciones', 'tipo_registro'])
-    
-    flash(f'REGISTRO MANUAL AGREGADO: {horas_totales:.2f} horas')
-    return redirect(url_for('registro_manual'))
+            return ['python']
 
-@app.route('/reporte-horas')
-@login_required
-def reporte_horas():
-    alumnos = leer_csv(ALUMNOS_CSV)
-    registros = leer_csv(REGISTROS_CSV)
+def print_banner():
+    """Muestra el banner de XONIAL"""
+    sistema = get_system()
+    distro = get_linux_distro()
     
-    alumnos_con_horas = []
-    for alumno in alumnos:
-        if alumno.get('activo') == '1':
-            total = obtener_total_horas_alumno(alumno.get('id_alumno', ''))
-            alumnos_con_horas.append({
-                'alumno': alumno,
-                'total_horas': total
-            })
+    sistema_texto = {
+        'windows': 'WINDOWS',
+        'linux': f'LINUX ({distro.upper()})' if distro else 'LINUX',
+        'darwin': 'MACOS'
+    }.get(sistema, 'DESCONOCIDO')
     
-    alumnos_con_horas.sort(key=lambda x: x['total_horas'], reverse=True)
-    
-    total_general = sum(a['total_horas'] for a in alumnos_con_horas)
-    promedio = total_general / len(alumnos_con_horas) if alumnos_con_horas else 0
-    
-    fecha_actual = datetime.now()
-    
-    # Estadísticas por carrera
-    carreras = {}
-    for item in alumnos_con_horas:
-        carrera = item['alumno'].get('carrera', '')
-        if carrera not in carreras:
-            carreras[carrera] = {'total': 0, 'alumnos': 0}
-        carreras[carrera]['total'] += item['total_horas']
-        carreras[carrera]['alumnos'] += 1
-    
-    return render_template('reporte_horas.html',
-                         alumnos_con_horas=alumnos_con_horas,
-                         total_general=total_general,
-                         promedio=promedio,
-                         fecha_actual=fecha_actual,
-                         carreras=carreras)
+    banner = f"""
+{Colors.CYAN}{Colors.BOLD}╔═══════════════════════════════════════════════════════════╗
+║                    XONIAL 2026 v1.0                          ║
+║              Monitoreo de Servicio Social                     ║
+║                                                               ║
+║              Sistema detectado: {sistema_texto:<15}           ║
+║                                                               ║
+║              Desarrollado por: Darian Alberto                ║
+║              Camacho Salas                                    ║
+║              #Somos XONINDU                                   ║
+╚═══════════════════════════════════════════════════════════╝{Colors.END}
+    """
+    print(banner)
 
-@app.route('/exportar-csv')
-@login_required
-def exportar_csv():
-    import io
-    registros = leer_csv(REGISTROS_CSV)
-    alumnos = leer_csv(ALUMNOS_CSV)
-    
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    writer.writerow(['Fecha', 'Alumno', 'Carrera', 'No. Cuenta', 'Entrada', 'Salida', 'Horas', 'Observaciones', 'Tipo'])
-    
-    for registro in registros:
-        alumno = next((a for a in alumnos if a.get('id_alumno') == registro.get('id_alumno')), {})
-        writer.writerow([
-            registro.get('fecha', ''),
-            alumno.get('nombre', ''),
-            alumno.get('carrera', ''),
-            alumno.get('num_cuenta', ''),
-            registro.get('hora_entrada', ''),
-            registro.get('hora_salida', ''),
-            registro.get('horas_totales', ''),
-            registro.get('observaciones', ''),
-            registro.get('tipo_registro', '')
-        ])
-    
-    from flask import make_response
-    response = make_response(output.getvalue())
-    response.headers['Content-Disposition'] = 'attachment; filename=xonial_registros.csv'
-    response.headers['Content-type'] = 'text/csv'
-    return response
+def check_python():
+    """Verifica Python instalado"""
+    try:
+        cmd = get_python_command() + ['--version']
+        subprocess.run(cmd, capture_output=True, check=True)
+        return True
+    except:
+        return False
 
-@app.route('/exportar-resumen')
-@login_required
-def exportar_resumen():
-    import io
-    alumnos = leer_csv(ALUMNOS_CSV)
-    
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    writer.writerow(['Alumno', 'Carrera', 'Semestre', 'No. Cuenta', 'Ocupación', 'Contacto', 'Horas Totales', 'Estado'])
-    
-    for alumno in alumnos:
-        if alumno.get('activo') == '1':
-            total_horas = obtener_total_horas_alumno(alumno.get('id_alumno', ''))
-            writer.writerow([
-                alumno.get('nombre', ''),
-                alumno.get('carrera', ''),
-                alumno.get('semestre', ''),
-                alumno.get('num_cuenta', ''),
-                alumno.get('ocupacion', ''),
-                alumno.get('contacto', ''),
-                f'{total_horas:.2f}',
-                'Activo'
-            ])
-    
-    from flask import make_response
-    response = make_response(output.getvalue())
-    response.headers['Content-Disposition'] = 'attachment; filename=xonial_resumen.csv'
-    response.headers['Content-type'] = 'text/csv'
-    return response
+def check_python_module(module_name):
+    """Verifica si un módulo de Python está instalado"""
+    return importlib.util.find_spec(module_name) is not None
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('SESIÓN TERMINADA')
-    return redirect(url_for('login'))
+def check_dependencies():
+    """Verifica las dependencias de Python necesarias"""
+    print(f"\n{Colors.BOLD}Verificando dependencias de Python...{Colors.END}")
+    
+    dependencias = [
+        ('flask', 'flask', 'Framework web'),
+    ]
+    
+    faltantes = []
+    
+    for modulo, paquete, desc in dependencias:
+        if check_python_module(modulo):
+            print(f"{Colors.GREEN}  ✓ {modulo}: OK{Colors.END}")
+        else:
+            print(f"{Colors.YELLOW}  ✗ {modulo}: FALTANTE{Colors.END}")
+            faltantes.append(paquete)
+    
+    return faltantes
+
+def install_dependencies(faltantes):
+    """Instala las dependencias faltantes"""
+    if not faltantes:
+        return True
+    
+    print(f"\n{Colors.BOLD}Instalando dependencias faltantes...{Colors.END}")
+    
+    sistema = get_system()
+    distro = get_linux_distro()
+    
+    if faltantes:
+        print(f"Paquetes a instalar: {', '.join(faltantes)}")
+        
+        # Construir comando de instalación
+        cmd = [sys.executable, '-m', 'pip', 'install']
+        
+        # Agregar opciones según sistema
+        if sistema == 'linux':
+            if distro in ['arch', 'manjaro', 'fedora']:
+                cmd.append('--break-system-packages')
+                print(f"{Colors.YELLOW}→ Usando --break-system-packages para {distro}{Colors.END}")
+            else:
+                # En Ubuntu/Debian más recientes también puede necesitar --break-system-packages
+                try:
+                    # Verificar si estamos en un sistema con external environment management
+                    test_cmd = [sys.executable, '-m', 'pip', 'install', '--help']
+                    result = subprocess.run(test_cmd, capture_output=True, text=True)
+                    if '--break-system-packages' in result.stdout:
+                        print(f"{Colors.YELLOW}→ Sistema detecta --break-system-packages disponible{Colors.END}")
+                        respuesta = input("¿Usar --break-system-packages? (s/n) [recomendado para sistemas nuevos]: ")
+                        if respuesta.lower() == 's':
+                            cmd.append('--break-system-packages')
+                        else:
+                            cmd.append('--user')
+                    else:
+                        cmd.append('--user')
+                except:
+                    cmd.append('--user')
+        elif sistema == 'darwin':
+            cmd.append('--user')
+        
+        cmd.extend(faltantes)
+        
+        # Intentar instalación
+        try:
+            print(f"Ejecutando: {' '.join(cmd)}")
+            subprocess.run(cmd, check=True)
+            print(f"{Colors.GREEN}✓ Dependencias instaladas correctamente{Colors.END}")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"{Colors.RED}Error instalando dependencias: {e}{Colors.END}")
+            print(f"\n{Colors.YELLOW}Intentando método alternativo...{Colors.END}")
+            
+            # Segundo intento: solo --user
+            try:
+                cmd2 = [sys.executable, '-m', 'pip', 'install', '--user'] + faltantes
+                subprocess.run(cmd2, check=True)
+                print(f"{Colors.GREEN}✓ Instaladas con --user{Colors.END}")
+                return True
+            except:
+                print(f"{Colors.RED}✗ Falló la instalación{Colors.END}")
+                print(f"\nInstala manualmente:")
+                print(f"  pip install {' '.join(faltantes)}")
+                return False
+    
+    return True
+
+def verificar_importaciones():
+    """Verifica que todas las importaciones necesarias funcionen"""
+    print(f"\n{Colors.BOLD}Verificando importaciones...{Colors.END}")
+    
+    modulos = [
+        ('flask', 'Flask'),
+    ]
+    
+    todos_ok = True
+    for modulo, nombre in modulos:
+        try:
+            __import__(modulo)
+            print(f"{Colors.GREEN}  ✓ {nombre}: OK{Colors.END}")
+        except ImportError:
+            print(f"{Colors.RED}  ✗ {nombre}: FALLO{Colors.END}")
+            todos_ok = False
+    
+    return todos_ok
+
+def crear_estructura_directorios():
+    """Crea la estructura de directorios necesaria"""
+    print(f"\n{Colors.BOLD}Verificando estructura de directorios...{Colors.END}")
+    
+    directorios = ['templates', 'data']
+    creados = []
+    
+    for dir_name in directorios:
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+            creados.append(dir_name)
+            print(f"{Colors.GREEN}  ✓ Creado directorio: {dir_name}/{Colors.END}")
+        else:
+            print(f"{Colors.GREEN}  ✓ Directorio existe: {dir_name}/{Colors.END}")
+    
+    return creados
+
+def crear_accesos_directos():
+    """Crea accesos directos para cada sistema"""
+    sistema = get_system()
+    
+    if sistema == 'windows':
+        # Crear .bat para Windows
+        with open('INICIAR_XONIAL.bat', 'w') as f:
+            f.write("""@echo off
+title XONIAL 2026 - Monitoreo de Servicio Social
+color 0A
+echo ========================================
+echo      XONIAL 2026 - Servicio Social
+echo      Desarrollado por Darian Alberto
+echo      #Somos XONINDU
+echo ========================================
+echo.
+python start.py
+pause
+""")
+        print(f"{Colors.GREEN}✓ Creado INICIAR_XONIAL.bat - Haz doble clic para ejecutar{Colors.END}")
+    
+    elif sistema == 'linux':
+        # Crear .sh para Linux
+        with open('INICIAR_XONIAL.sh', 'w') as f:
+            f.write("""#!/bin/bash
+echo "========================================"
+echo "      XONIAL 2026 - Servicio Social"
+echo "      Desarrollado por Darian Alberto"
+echo "      #Somos XONINDU"
+echo "========================================"
+echo ""
+python3 start.py
+read -p "Presiona Enter para salir"
+""")
+        os.chmod('INICIAR_XONIAL.sh', 0o755)
+        print(f"{Colors.GREEN}✓ Creado INICIAR_XONIAL.sh - Ejecuta con: ./INICIAR_XONIAL.sh{Colors.END}")
+    
+    elif sistema == 'darwin':
+        # Crear .command para Mac
+        with open('INICIAR_XONIAL.command', 'w') as f:
+            f.write("""#!/bin/bash
+cd "$(dirname "$0")"
+echo "========================================"
+echo "      XONIAL 2026 - Servicio Social"
+echo "      Desarrollado por Darian Alberto"
+echo "      #Somos XONINDU"
+echo "========================================"
+echo ""
+python3 start.py
+""")
+        os.chmod('INICIAR_XONIAL.command', 0o755)
+        print(f"{Colors.GREEN}✓ Creado INICIAR_XONIAL.command - Haz doble clic para ejecutar{Colors.END}")
+
+def mostrar_instrucciones():
+    """Muestra instrucciones de uso"""
+    instrucciones = f"""
+{Colors.BOLD}📋 INSTRUCCIONES DE USO:{Colors.END}
+
+1. Credenciales por defecto:
+   {Colors.GREEN}Usuario: xonial{Colors.END}
+   {Colors.GREEN}Contraseña: xonial123{Colors.END}
+
+2. Accede al sistema:
+   {Colors.CYAN}http://127.0.0.1:5000/login{Colors.END}
+
+3. Funcionalidades principales:
+   • Dashboard con estadísticas en tiempo real
+   • Registro rápido de entradas y salidas
+   • Gestión completa de alumnos
+   • Reportes y exportación de datos
+
+4. Para salir del servidor:
+   Presiona {Colors.YELLOW}Ctrl+C{Colors.END} en esta terminal
+    """
+    print(instrucciones)
+
+def verificar_xonial_py():
+    """Verifica que existe xonial.py"""
+    if not os.path.exists('xonial.py'):
+        print(f"\n{Colors.RED}✗ Error: No se encuentra xonial.py{Colors.END}")
+        print("Asegúrate de que xonial.py está en el mismo directorio")
+        print("\nPuedes descargarlo desde:")
+        print("  https://github.com/XONIDU/xonial")
+        return False
+    else:
+        print(f"{Colors.GREEN}✓ Archivo xonial.py encontrado{Colors.END}")
+        return True
+
+def main():
+    """Función principal"""
+    # Limpiar pantalla
+    if get_system() == 'windows':
+        os.system('cls')
+    else:
+        os.system('clear')
+    
+    # Mostrar banner
+    print_banner()
+    
+    # Verificar Python
+    if not check_python():
+        print(f"\n{Colors.RED}Error: Python no está instalado{Colors.END}")
+        print("Instala Python desde: https://www.python.org/downloads/")
+        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+        return
+    
+    python_version = subprocess.run(get_python_command() + ['--version'], 
+                                   capture_output=True, text=True).stdout.strip()
+    print(f"{Colors.BOLD}Python:{Colors.END} {python_version}")
+    print(f"{Colors.BOLD}Directorio:{Colors.END} {os.path.dirname(os.path.abspath(__file__))}")
+    
+    # Verificar que existe xonial.py
+    if not verificar_xonial_py():
+        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+        return
+    
+    # Crear estructura de directorios
+    crear_estructura_directorios()
+    
+    # Verificar dependencias
+    faltantes = check_dependencies()
+    
+    if faltantes:
+        print(f"\n{Colors.YELLOW}⚠ Se requiere instalar dependencias{Colors.END}")
+        respuesta = input("¿Instalar automáticamente? (s/n): ")
+        
+        if respuesta.lower() == 's':
+            if not install_dependencies(faltantes):
+                print(f"\n{Colors.RED}No se pudieron instalar las dependencias{Colors.END}")
+                respuesta2 = input("¿Continuar de todas formas? (s/n): ")
+                if respuesta2.lower() != 's':
+                    return
+        else:
+            print(f"\nPuedes instalarlas manualmente con:")
+            print("  pip install flask")
+            return
+    
+    # Verificar que las importaciones funcionan
+    print(f"\n{Colors.BOLD}Verificando módulos...{Colors.END}")
+    if not verificar_importaciones():
+        print(f"\n{Colors.RED}Error: No se puede importar Flask{Colors.END}")
+        print("El programa no puede continuar sin esta dependencia")
+        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+        return
+    
+    # Mostrar instrucciones
+    mostrar_instrucciones()
+    
+    print(f"\n{Colors.BOLD}Iniciando XONIAL...{Colors.END}")
+    print(f"{Colors.BOLD}Para detener el servidor:{Colors.END} Ctrl+C")
+    print("-" * 60)
+    
+    # Pausa breve antes de iniciar
+    time.sleep(2)
+    
+    # EJECUTAR xonial.py
+    try:
+        python_cmd = get_python_command()
+        cmd = python_cmd + ['xonial.py']
+        print(f"Ejecutando: {' '.join(cmd)}")
+        print("-" * 60)
+        
+        # Ejecutar xonial.py
+        resultado = subprocess.run(cmd)
+        
+        if resultado.returncode != 0:
+            print(f"\n{Colors.RED}Error: xonial.py terminó con código {resultado.returncode}{Colors.END}")
+            
+    except FileNotFoundError:
+        print(f"\n{Colors.RED}Error: No se encuentra xonial.py{Colors.END}")
+    except KeyboardInterrupt:
+        print(f"\n{Colors.YELLOW}Servidor detenido por el usuario{Colors.END}")
+    except Exception as e:
+        print(f"\n{Colors.RED}Error ejecutando xonial.py: {e}{Colors.END}")
+    
+    print(f"\n{Colors.CYAN}╔═══════════════════════════════════════════════════════════╗{Colors.END}")
+    print(f"{Colors.CYAN}║{Colors.END}     Gracias por usar XONIAL 2026                          {Colors.CYAN}║{Colors.END}")
+    print(f"{Colors.CYAN}║{Colors.END}     Desarrollado por: Darian Alberto Camacho Salas        {Colors.CYAN}║{Colors.END}")
+    print(f"{Colors.CYAN}║{Colors.END}     #Somos XONINDU                                        {Colors.CYAN}║{Colors.END}")
+    print(f"{Colors.CYAN}╚═══════════════════════════════════════════════════════════╝{Colors.END}")
+    
+    # Pausa al final (excepto en Windows que ya tiene pausa por el .bat)
+    if get_system() != 'windows':
+        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
 
 if __name__ == '__main__':
-    inicializar_csv()
-    print("""
-    ╔══════════════════════════════════════╗
-    ║     XONIAL - Sistema de Monitoreo    ║
-    ║       Servicio Social v1.0           ║
-    ╚══════════════════════════════════════╝
-    
-    Backend: Darian Alberto Camacho Salas
-    Fronted: Oscar Rodolfo Barragan Perez
-    Asesor: Dr. Raul Dali Cruz Morales
-
-    [*] Sistema inicializado correctamente
-    [*] Credenciales por defecto:
-        └─ Usuario: xonial
-        └─ Contraseña: xonial123
-    [*] Archivo de credenciales: credenciales.txt
-    [*] Servidor corriendo en: http://127.0.0.1:5115
-    """)
-    app.run(debug=True, host='0.0.0.0', port=5115)
+    try:
+        # Crear accesos directos
+        crear_accesos_directos()
+        
+        # Ejecutar programa principal
+        main()
+    except KeyboardInterrupt:
+        print(f"\n{Colors.YELLOW}Saliendo...{Colors.END}")
+    except Exception as e:
+        print(f"\n{Colors.RED}Error inesperado: {e}{Colors.END}")
+        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
