@@ -1,0 +1,11 @@
+#SOMOS XONIDU
+#Creador: Darian Alberto Camacho Salas
+
+=== CREDENCIALES POR DEFECTO ===
+Usuario: xonial
+Contraseña: xonial123
+
+=== INSTRUCCIONES ===
+1. Para cambiar credenciales, edita el archivo data/usuarios.csv
+2. Mantén el formato: username,password,nombre
+3. Reinicia el sistema después de los cambios
