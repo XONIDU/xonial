@@ -130,8 +130,9 @@ Interfaz estilo **hacker/terminal**:
 
 ## 👨‍💻 **Créditos**
 
-**Creador:** Darian Alberto Camacho Salas  
-**Equipo:** #Somos XONINDU  
+**Creador:** Darian Alberto Camacho Salas
+**Frontend:** Oscar Rodolfo Barragan Perez
+**Equipo:** Somos XONINDU  
 **Contacto:** xonidu@gmail.com
 
 ---
