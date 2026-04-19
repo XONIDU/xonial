@@ -320,7 +320,7 @@ def main():
         # Abrir navegador después de un breve retraso
         def abrir_navegador():
             time.sleep(2)
-            webbrowser.open('http://127.0.0.1:5000')
+            webbrowser.open('http://127.0.0.1:5115')
         threading.Thread(target=abrir_navegador, daemon=True).start()
         subprocess.run(cmd)
     except KeyboardInterrupt:
