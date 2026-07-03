@@ -3,7 +3,7 @@
 
 **Sistema de monitoreo de servicio social para instituciones educativas**  
 Control de horas, reportes automáticos y gestión de alumnos.  
-Desarrollado por Darian Alberto Camacho Salas – [XONIDU](https://github.com/XONIDU)
+Desarrollado por Darian Alberto Camacho Salas y Oscar Rodolfo Barragan Perez– [XONIDU](https://github.com/XONIDU)
 
 ---
 
