@@ -1,9 +1,8 @@
-
 # 📀 XONIAL
 
 **Sistema de monitoreo de servicio social para instituciones educativas**  
 Control de horas, reportes automáticos y gestión de alumnos.  
-Desarrollado por Darian Alberto Camacho Salas y Oscar Rodolfo Barragan Perez– [XONIDU](https://github.com/XONIDU)
+Desarrollado por **Darian Alberto Camacho Salas** y **Oscar Rodolfo Barragan Perez** – [XONIDU](https://github.com/XONIDU)
 
 ---
 
@@ -86,13 +85,14 @@ python3 start.py
 title XONIAL 2026 - Monitoreo de Servicio Social
 color 0A
 
+cd /d "%~dp0"
+
 :: ============================================================
 :: SOLICITAR PERMISOS DE ADMINISTRADOR
 :: ============================================================
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo Solicitando permisos de administrador...
-    echo.
     echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
     echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
     "%temp%\getadmin.vbs"
@@ -101,20 +101,32 @@ if %errorlevel% neq 0 (
 )
 
 :: ============================================================
-:: EJECUTAR start.py CON PERMISOS DE ADMINISTRADOR
+:: VERIFICAR QUE start.py EXISTE
+:: ============================================================
+if not exist "%~dp0start.py" (
+    echo [ERROR] No se encuentra start.py en esta carpeta
+    echo Asegúrate de que el archivo start.py esté en el mismo directorio.
+    pause
+    exit /B
+)
+
+:: ============================================================
+:: MOSTRAR BANNER Y EJECUTAR
 :: ============================================================
 cls
 echo ============================================================
-echo              XONIAL 2026 - Monitoreo de Servicio Social
+echo          XONIAL 2026 - Monitoreo de Servicio Social
 echo              (Modo Administrador)
 echo ============================================================
 echo.
 echo [OK] Permisos de administrador obtenidos
+echo [INFO] Directorio de trabajo: %~dp0
 echo.
 echo Iniciando XONIAL...
+echo [INFO] Accede a: http://localhost:5000
+echo [INFO] Desde tu red local: http://<TU-IP>:5000
 echo.
 echo [INFO] Credenciales por defecto: xonial / xonial123
-echo [INFO] Accede a: http://127.0.0.1:5000/login
 echo.
 echo Presiona Ctrl+C para detener el servidor
 echo ============================================================
@@ -301,18 +313,32 @@ Si todo funciona, verás mensajes en la terminal y el servidor disponible en `ht
 
 ## 📄 Licencia
 
-© 2026 Darian Alberto Camacho Salas (XONIDU)  
-Todos los derechos reservados. No se permite la copia, distribución o modificación sin autorización explícita.
+**Licencia Personalizada (no comercial)**
+
+Derechos de autor (c) 2026 Darian Alberto Camacho Salas
+
+Se concede permiso, de forma gratuita, a cualquier persona que obtenga una copia de este software y los archivos de documentación asociados (el "Software"), para usar el Software sin restricción, incluyendo sin limitación los derechos de uso, copia, modificación, fusión, publicación, distribución, sublicencia y/o venta de copias del Software, y para permitir a las personas a quienes se les proporcione el Software hacerlo, sujeto a las siguientes condiciones:
+
+- El aviso de copyright anterior y este aviso de permiso deberán incluirse en todas las copias o partes sustanciales del Software.
+
+- Este software se proporciona solo para fines educativos y personales. El uso comercial está estrictamente prohibido sin el permiso previo por escrito del autor. El uso comercial incluye, entre otros: vender el software o cualquier obra derivada; usar el software como parte de un servicio o producto comercial; usar el software para actividades que generen ingresos.
+
+- Cualquier modificación o trabajo derivado debe conservar el aviso de copyright original, esta licencia, y dar el crédito adecuado al autor original (Darian Alberto Camacho Salas).
+
+- El nombre del autor "Darian Alberto Camacho Salas" y la organización "XONIDU" deben ser acreditados en cualquier distribución pública o exhibición del software o sus derivados.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A LAS GARANTÍAS DE COMERCIABILIDAD, ADECUACIÓN PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN NINGÚN CASO LOS AUTORES O TITULARES DE LOS DERECHOS DE AUTOR SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN, DAÑO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO O DE OTRO TIPO, QUE SURJA DE, O EN CONEXIÓN CON EL SOFTWARE O EL USO U OTRO TIPO DE ACCIONES EN EL SOFTWARE.
 
 ---
 
 ## ✉️ Contacto
 
 - **Creador:** Darian Alberto Camacho Salas  
+- **Co-desarrollador:** Oscar Rodolfo Barragan Perez  
 - **Email:** xonidu@gmail.com  
 - **GitHub:** [@XONIDU](https://github.com/XONIDU)  
 
 ---
 
 Hecho con 🖥️ y código para simplificar la gestión del servicio social.  
-**XONIAL** – Control académico sin papeleo
+**XONIAL** – Control académico sin papeleo.
